@@ -1,0 +1,2 @@
+epoch,cls_distill_loss,dfl_distill_loss,m2d2_distill_loss,box_reg_distill_loss,feat_l2_loss,feat_att_loss,feat_other_loss
+1,0.007058,2.792988,2.744697,0.080929,0.997000,0.018601,0.155129
