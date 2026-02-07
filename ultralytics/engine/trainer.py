@@ -540,7 +540,7 @@ class BaseTrainer:
         self.args.m2d2_alpha= getattr(self.args, "m2d2_alpha", 1.)
         self.args.dfl_t= getattr(self.args, "dfl_t", 1.)
         self.args.dfl_alpha= getattr(self.args, "dfl_alpha", 1.)
-        self.args.l2_alpha= getattr(self.args, "cls_alpha", 1.)
+        self.args.l2_alpha= getattr(self.args, "l2_alpha", 1.)
         self.args.mask_type = getattr(self.args, "mask_type", "original") # original or pyramid
         self.teacher_args = SimpleNamespace(
             mode="train",
@@ -1245,7 +1245,7 @@ class BaseTrainer:
                                         # Broadcast-assign averaged vector to all those positions
                                         dfl_part[bi][:, pos_idx] = avg_vec  # replaced in-place
                             # Reconstruct the feature map: concat cls + updated dfl
-                            new_feat_flat = torch.cat([cls_part, dfl_part], dim=1)  # [B, C, HW]
+                            new_feat_flat = torch.cat([dfl_part, cls_part], dim=1)  # [B, C, HW]
                             new_feat = new_feat_flat.view(b, C, H, W).to(device=device, dtype=dtype)
                             updated_preds.append(new_feat)
                         # ----- M2D2 distillation starts here -----
