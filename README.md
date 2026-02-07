@@ -23,16 +23,3 @@ The current implementation focuses on testing and comparing:
 
 Additional distillation approaches are planned for future implementation and comparison.
 
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/Mahdi-Golizadeh/moded_YOLO.git
-cd moded_YOLO
-
-# Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install PyTorch with CUDA support (adjust according to your system)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118

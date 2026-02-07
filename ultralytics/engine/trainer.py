@@ -886,6 +886,12 @@ class BaseTrainer:
             self.neck_adaptor = self.neck_adaptor.to(self.device)
             # if self.amp:
             #     self.neck_adaptor = self.neck_adaptor.half()
+            if world_size > 1:
+                self.neck_adaptor = nn.parallel.DistributedDataParallel(
+                    self.neck_adaptor,
+                    device_ids=[RANK],
+                    find_unused_parameters=True,
+                )
         self.scaler = (
             torch.amp.GradScaler("cuda", enabled=self.amp) if TORCH_2_4 else torch.cuda.amp.GradScaler(enabled=self.amp)
         )
@@ -1949,17 +1955,30 @@ class BaseTrainer:
         # Add feature distillation adaptor parameters
         # --------------------------------------------
         if hasattr(self, "neck_adaptor"):
+            neck_adaptor = (
+                self.neck_adaptor.module
+                if isinstance(self.neck_adaptor, nn.parallel.DistributedDataParallel)
+                else self.neck_adaptor
+            )
             optimizer.add_param_group(
                 {
                     "params": self.neck_adaptor.parameters(),
+                    "params": neck_adaptor.parameters(),
                     "weight_decay": decay,
                 }
             )
 
+
         # >>> ADD THIS BLOCK HERE <<<
         if hasattr(self, "neck_adaptor"):
+            neck_adaptor = (
+                self.neck_adaptor.module
+                if isinstance(self.neck_adaptor, nn.parallel.DistributedDataParallel)
+                else self.neck_adaptor
+            )
             found = False
             target = self.neck_adaptor.adaptors[0].weight
+            target = neck_adaptor.adaptors[0].weight
             for pg in optimizer.param_groups:
                 if any(p is target for p in pg["params"]):
                     print("Adaptor LR:", pg["lr"])
