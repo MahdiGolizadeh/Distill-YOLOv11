@@ -185,8 +185,11 @@ class FeatureDistillationLoss(nn.Module):
     def _l2_loss(self, s_feat, t_feat, mask=None):
         diff = (s_feat - t_feat) ** 2
         if mask is not None:
-            mask = mask.expand_as(diff)
-            return (diff * mask).sum() / (mask.sum() + self.eps)
+            # mask = mask.expand_as(diff)
+            # return (diff * mask).sum() / (mask.sum() + self.eps)
+            masked_diff = diff * mask  # broadcast [B,1,H,W] -> [B,C,H,W]
+            active = mask.sum() * diff.shape[1]
+            return masked_diff.sum() / (active + self.eps)
         return diff.mean()
 
     def _cosine_loss(self, s_feat, t_feat, mask=None):
@@ -1962,7 +1965,7 @@ class BaseTrainer:
             )
             optimizer.add_param_group(
                 {
-                    "params": self.neck_adaptor.parameters(),
+                    # "params": self.neck_adaptor.parameters(),
                     "params": neck_adaptor.parameters(),
                     "weight_decay": decay,
                 }
@@ -1977,7 +1980,7 @@ class BaseTrainer:
                 else self.neck_adaptor
             )
             found = False
-            target = self.neck_adaptor.adaptors[0].weight
+            # target = self.neck_adaptor.adaptors[0].weight
             target = neck_adaptor.adaptors[0].weight
             for pg in optimizer.param_groups:
                 if any(p is target for p in pg["params"]):
